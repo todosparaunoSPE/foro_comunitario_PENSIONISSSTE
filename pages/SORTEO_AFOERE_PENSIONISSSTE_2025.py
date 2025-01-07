@@ -37,8 +37,11 @@ if 'comments' not in st.session_state:
 def add_comment():
     comment = st.session_state.new_comment
     if comment:
+        # Agregar el comentario al estado de la sesión
         st.session_state.comments.append(comment)
-        save_comments(st.session_state.comments)  # Guardar en el archivo
+        # Guardar los comentarios en el archivo
+        save_comments(st.session_state.comments)
+        # Limpiar el campo de entrada
         st.session_state.new_comment = ""
 
 # Preguntas sobre el sorteo AFORE PENSIONISSSTE 2025
