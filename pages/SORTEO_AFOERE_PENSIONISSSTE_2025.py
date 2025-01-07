@@ -10,34 +10,49 @@ import sqlite3
 
 # Conexión a la base de datos SQLite
 def create_connection():
-    conn = sqlite3.connect('sorteo.db')
-    return conn
+    try:
+        conn = sqlite3.connect('sorteo.db')
+        return conn
+    except Exception as e:
+        st.error(f"Error al conectar a la base de datos: {e}")
 
 # Crear tabla si no existe
 def create_table():
     conn = create_connection()
-    with conn:
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS comments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                comment TEXT NOT NULL
-            )
-        ''')
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS comments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    comment TEXT NOT NULL
+                )
+            ''')
+    except Exception as e:
+        st.error(f"Error al crear la tabla: {e}")
+    finally:
+        conn.close()
 
 # Función para cargar comentarios desde la base de datos
 def load_comments():
     conn = create_connection()
-    with conn:
-        comments = conn.execute('SELECT comment FROM comments').fetchall()
-    return [comment[0] for comment in comments]
+    try:
+        with conn:
+            comments = conn.execute('SELECT comment FROM comments').fetchall()
+        return [comment[0] for comment in comments]
+    except Exception as e:
+        st.error(f"Error al cargar comentarios: {e}")
+        return []
 
 # Función para guardar un nuevo comentario en la base de datos
 def save_comment(comment):
     conn = create_connection()
-    with conn:
-        conn.execute('INSERT INTO comments (comment) VALUES (?)', (comment,))
-    conn.close()
+    try:
+        with conn:
+            conn.execute('INSERT INTO comments (comment) VALUES (?)', (comment,))
+    except Exception as e:
+        st.error(f"Error al guardar el comentario: {e}")
+    finally:
+        conn.close()
 
 # Crear tabla al inicio
 create_table()
@@ -58,6 +73,9 @@ def add_comment():
         save_comment(comment)  # Guardar en la base de datos
         st.session_state.comments.append(comment)  # Agregar al estado
         st.session_state.new_comment = ""
+        st.success("Comentario agregado exitosamente.")
+    else:
+        st.warning("El comentario no puede estar vacío.")
 
 # Preguntas y comentarios
 st.subheader("👉 Deja tus comentarios o preguntas:")
