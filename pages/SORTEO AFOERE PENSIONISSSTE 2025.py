@@ -9,6 +9,8 @@ import streamlit as st
 import json
 import os
 
+st.set_page_config(page_title="Foro Comunitario de Pensionissste - Sorteo 2025", page_icon="💬", layout="wide")
+
 # Estilo de fondo
 page_bg_img = """
 <style>
@@ -41,7 +43,7 @@ def save_comments(comments):
         json.dump(comments, f)
 
 # Título de la aplicación
-st.set_page_config(page_title="Foro Comunitario de Pensionissste - Sorteo 2025", page_icon="💬", layout="wide")
+
 st.title("💬 Foro Comunitario de AFORE PENSIONISSSTE - Sorteo 2025")
 st.markdown("¡Bienvenidos al foro de PENSIONISSSTE! Este es un espacio creado para que puedas compartir tus experiencias, resolver dudas y aprender más sobre el sorteo anual de AFORE PENSIONISSSTE.")
 
