@@ -6,28 +6,46 @@ Created on Tue Jan  7 16:44:14 2025
 """
 
 import streamlit as st
-import json
-import os
+import sqlite3
 
-# Archivo donde se guardarán los comentarios
-comments_file = 'sorteo.json'
+# Conexión a la base de datos SQLite
+def create_connection():
+    conn = sqlite3.connect('sorteo.db')
+    return conn
 
-# Función para cargar comentarios desde el archivo
+# Crear tabla si no existe
+def create_table():
+    conn = create_connection()
+    with conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                comment TEXT NOT NULL
+            )
+        ''')
+    conn.close()
+
+# Función para cargar comentarios desde la base de datos
 def load_comments():
-    if os.path.exists(comments_file):
-        with open(comments_file, 'r') as f:
-            return json.load(f)
-    return []
+    conn = create_connection()
+    with conn:
+        comments = conn.execute('SELECT comment FROM comments').fetchall()
+    return [comment[0] for comment in comments]
 
-# Función para guardar comentarios en el archivo
-def save_comments(comments):
-    with open(comments_file, 'w') as f:
-        json.dump(comments, f)
+# Función para guardar un nuevo comentario en la base de datos
+def save_comment(comment):
+    conn = create_connection()
+    with conn:
+        conn.execute('INSERT INTO comments (comment) VALUES (?)', (comment,))
+    conn.close()
 
-# Título de la aplicación
+# Crear tabla al inicio
+create_table()
+
+# Configuración de la aplicación
 st.set_page_config(page_title="Foro Comunitario de Pensionissste - Sorteo 2025", page_icon="💬", layout="wide")
 st.title("💬 Foro Comunitario de AFORE PENSIONISSSTE - Sorteo 2025")
-st.markdown("¡Bienvenidos al foro de PENSIONISSSTE! Este es un espacio creado para que puedas compartir tus experiencias, resolver dudas y aprender más sobre el sorteo anual de AFORE PENSIONISSSTE.")
+st.markdown("¡Bienvenidos al foro de PENSIONISSSTE!")
 
 # Cargar comentarios existentes
 if 'comments' not in st.session_state:
@@ -37,51 +55,18 @@ if 'comments' not in st.session_state:
 def add_comment():
     comment = st.session_state.new_comment
     if comment:
-        # Agregar el comentario al estado de la sesión
-        st.session_state.comments.append(comment)
-        # Guardar los comentarios en el archivo
-        save_comments(st.session_state.comments)
-        # Limpiar el campo de entrada
+        save_comment(comment)  # Guardar en la base de datos
+        st.session_state.comments.append(comment)  # Agregar al estado
         st.session_state.new_comment = ""
 
-# Preguntas sobre el sorteo AFORE PENSIONISSSTE 2025
-st.subheader("👉 Queremos conocer tu opinión sobre el Sorteo AFORE PENSIONISSSTE 2025:")
-st.markdown("1. ¿Conoces el sorteo de AFORE PENSIONISSSTE que se realiza cada año?")
-st.markdown("2. ¿Cómo te enteraste del sorteo de AFORE PENSIONISSSTE?")
-st.markdown("3. ¿Consideras que el sorteo beneficia a los trabajadores que tienen su dinero en PENSIONISSSTE? ¿Por qué?")
-st.markdown("4. ¿Qué premios te gustaría que se ofrecieran en el sorteo de AFORE PENSIONISSSTE?")
-st.markdown("5. ¿Crees que el sorteo ayuda a incentivar el ahorro para el retiro? Explica tu respuesta.")
-st.markdown("6. ¿Qué sugerencias tienes para mejorar el sorteo de AFORE PENSIONISSSTE?")
-st.markdown("7. ¿Cómo crees que el sorteo podría beneficiar a los trabajadores en su futuro financiero?")
-st.markdown("8. ¿Qué impacto crees que tendría si más personas conocieran el sorteo de AFORE PENSIONISSSTE?")
-
-# Comentarios adicionales sobre el sorteo
-st.subheader("👉 Deja tus comentarios o preguntas sobre el sorteo AFORE PENSIONISSSTE 2025:")
+# Preguntas y comentarios
+st.subheader("👉 Deja tus comentarios o preguntas:")
 comment_input = st.text_input("Comentario:", key='new_comment', on_change=add_comment)
 
-# Diseño de columnas para mostrar comentarios
+# Mostrar comentarios
 st.subheader("Comentarios:")
 if st.session_state.comments:
-    cols = st.columns(3)  # Crear tres columnas
-    for i, comment in enumerate(st.session_state.comments):
-        cols[i % 3].markdown(f"<div style='background-color: #f0f0f0; border-radius: 5px; padding: 10px; margin: 5px; color: black;'>- {comment}</div>", unsafe_allow_html=True)
+    for comment in st.session_state.comments:
+        st.markdown(f"- {comment}")
 else:
-    st.write("No hay comentarios aún. ¡Sé el primero en comentar!")
-
-# Estilo adicional con CSS
-st.markdown("""
-<style>
-    .stTextInput > div > input {
-        font-size: 16px;
-        padding: 10px;
-    }
-    .stButton > button {
-        background-color: #0072B1;
-        color: white;
-        font-weight: bold;
-    }
-    .stButton > button:hover {
-        background-color: #005f8c;
-    }
-</style>
-""", unsafe_allow_html=True)
+    st.write("No hay comentarios aún.")
