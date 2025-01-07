@@ -7,6 +7,8 @@ Created on Tue Jan  7 16:52:26 2025
 
 import streamlit as st
 
+st.set_page_config(page_title="Foro Comunitario de AFORE PENSIONISSSTE", page_icon="💬", layout="wide")
+
 # Estilo de fondo
 page_bg_img = """
 <style>
@@ -24,7 +26,7 @@ background-size:16px 16px;
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Título y descripción de la aplicación
-st.set_page_config(page_title="Foro Comunitario de AFORE PENSIONISSSTE", page_icon="💬", layout="wide")
+
 st.title("💬 Foro Comunitario de AFORE PENSIONISSSTE")
 st.markdown("""
 ¡Bienvenidos al foro de AFORE PENSIONISSSTE! Este es un espacio creado para que puedas compartir tus experiencias, resolver dudas y aprender más sobre el sistema de pensiones y el sorteo anual de AFORE PENSIONISSSTE.
