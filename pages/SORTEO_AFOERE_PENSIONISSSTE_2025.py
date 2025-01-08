@@ -6,46 +6,27 @@ Created on Tue Jan  7 16:44:14 2025
 """
 
 import streamlit as st
-import sqlite3
+import os
 
-# Conexión a la base de datos SQLite
-def create_connection():
-    conn = sqlite3.connect('comentarios.db')
-    return conn
+# Archivo donde se guardarán los comentarios
+comments_file = 'experiencias.txt'
 
-# Crear tabla si no existe
-def create_table():
-    conn = create_connection()
-    with conn:
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS comentarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                comentario TEXT NOT NULL
-            )
-        ''')
-    conn.close()
-
-# Función para cargar comentarios desde la base de datos
+# Función para cargar comentarios desde el archivo de texto
 def load_comments():
-    conn = create_connection()
-    with conn:
-        comentarios = conn.execute('SELECT comentario FROM comentarios').fetchall()
-    return [comentario[0] for comentario in comentarios]
+    if os.path.exists(comments_file):
+        with open(comments_file, 'r') as f:
+            return f.readlines()  # Lee todas las líneas del archivo
+    return []
 
-# Función para guardar un nuevo comentario en la base de datos
-def save_comment(comentario):
-    conn = create_connection()
-    with conn:
-        conn.execute('INSERT INTO comentarios (comentario) VALUES (?)', (comentario,))
-    conn.close()
+# Función para guardar un nuevo comentario en el archivo de texto
+def save_comment(comment):
+    with open(comments_file, 'a') as f:  # Abre el archivo en modo "append"
+        f.write(comment + '\n')  # Añade el comentario seguido de una nueva línea
 
-# Crear tabla al inicio
-create_table()
-
-# Configuración de la aplicación
+# Título de la aplicación
 st.set_page_config(page_title="Foro Comunitario de Pensionissste", page_icon="💬", layout="wide")
 st.title("💬 Foro Comunitario de Pensionissste")
-st.markdown("¡Bienvenidos al foro de PENSIONISSSTE!")
+st.markdown("¡Bienvenidos al foro de PENSIONISSSTE! Este es un espacio creado para que puedas compartir tus experiencias, resolver dudas y aprender más sobre cómo aprovechar al máximo tu ahorro para el retiro.")
 
 # Cargar comentarios existentes
 if 'comments' not in st.session_state:
@@ -53,14 +34,11 @@ if 'comments' not in st.session_state:
 
 # Función para agregar un nuevo comentario
 def add_comment():
-    comentario = st.session_state.new_comment
-    if comentario:
-        save_comment(comentario)  # Guardar en la base de datos
-        st.session_state.comments.append(comentario)  # Agregar al estado
-        st.session_state.new_comment = ""
-        st.success("Comentario agregado exitosamente.")
-    else:
-        st.warning("El comentario no puede estar vacío.")
+    comment = st.session_state.new_comment
+    if comment:
+        st.session_state.comments.append(comment)  # Agrega el comentario al estado
+        save_comment(comment)  # Guarda el comentario en el archivo
+        st.session_state.new_comment = ""  # Limpia el campo de entrada
 
 # Formulario para agregar comentarios
 st.subheader("👉 Cuéntanos un poco sobre tu experiencia con el sistema de pensiones:")
@@ -69,8 +47,8 @@ comment_input = st.text_input("Comentario:", key='new_comment', on_change=add_co
 # Mostrar comentarios
 st.subheader("Comentarios:")
 if st.session_state.comments:
-    for comentario in st.session_state.comments:
-        st.markdown(f"- {comentario}")
+    for comment in st.session_state.comments:
+        st.markdown(f"- {comment.strip()}")  # Muestra el comentario sin espacios en blanco
 else:
     st.write("No hay comentarios aún. ¡Sé el primero en comentar!")
 
