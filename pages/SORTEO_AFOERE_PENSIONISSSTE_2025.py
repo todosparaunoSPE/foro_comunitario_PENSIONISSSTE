@@ -36,9 +36,12 @@ if 'comments' not in st.session_state:
 def add_comment():
     comment = st.session_state.new_comment
     if comment:
-        st.session_state.comments.append(comment)  # Agrega el comentario al estado
-        save_comment(comment)  # Guarda el comentario en el archivo
+        st.session_state.comments.append(comment.strip())  # Agrega el comentario al estado
+        save_comment(comment.strip())  # Guarda el comentario en el archivo
         st.session_state.new_comment = ""  # Limpia el campo de entrada
+        st.success("Comentario agregado exitosamente.")  # Mensaje de éxito
+    else:
+        st.warning("El comentario no puede estar vacío.")  # Advertencia si el comentario está vacío
 
 # Formulario para agregar comentarios
 st.subheader("👉 Cuéntanos un poco sobre tu experiencia con el sistema de pensiones:")
